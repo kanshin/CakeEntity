@@ -1,6 +1,6 @@
 <?php
 
-class Entity extends Object {
+class Entity extends Object implements ArrayAccess {
 	/**
 	 *	エンティティを生成する。
 	 *	
@@ -43,6 +43,22 @@ class Entity extends Object {
 		$html .= '</div>';
 		
 		return $html;
+	}
+	
+	public function offsetExists($offset) {
+		return true;
+	}
+	
+	public function offsetGet($offset) {
+		return empty($this->{$offset}) ? null : $this->{$offset};
+	}
+	
+	public function offsetSet($offset, $value) {
+		$this->{$offset} = $value;
+	}
+	
+	public function offsetUnset($offset) {
+		unset($this->{$offset});
 	}
 }
 
