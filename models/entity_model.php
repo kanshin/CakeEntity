@@ -4,6 +4,7 @@ App::import('Model', 'Entity.Entity');
 
 class EntityModel extends EntityAppModel {
 	protected $entity;
+	protected $convertToEntity;
 	
 	public function toEntity($data) {
 		if (empty($this->entity)) return null;
@@ -30,13 +31,39 @@ class EntityModel extends EntityAppModel {
 		return $result;
 	}
 	
+	public function beforeFind($queryData) {
+		$this->convertToEntity = !empty($queryData['entity']);
+		
+		return parent::beforeFind($queryData);
+	}
+	
 	public function afterFind($result, $primary) {
 		$result = parent::afterFind($result, $primary);
 		
-		if ($primary and !empty($this->entity)) {
+		if ($this->convertToEntity and $primary and !empty($this->entity)) {
 			$result = $this->toEntities($result);
 		}
+		
 		return $result;
+	}
+	
+	public function call__($method, $params) {
+		$to_entity = false;
+		$all = false;
+		
+		if (preg_match('/^(entity|allentities)by(.+)$/i', $method, $matches)) {
+			$to_entity = true;
+			$all = (strtolower($matches[1]) == 'allentities');
+			$method = ($all ? 'findAllBy' : 'findBy'). $matches[2];
+		}
+		
+		$return = parent::call__($method, $params);
+		
+		if ($to_entity) {
+			$return = ($all ? $this->toEntities($return) : $this->toEntity($return));
+		}
+		
+		return $return;
 	}
 }
 
