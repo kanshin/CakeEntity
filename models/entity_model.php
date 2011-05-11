@@ -3,15 +3,23 @@
 App::import('Model', 'Entity.Entity');
 
 class EntityModel extends EntityAppModel {
-	protected $entity;
 	protected $convertToEntity;
 	
-	public function toEntity($data) {
-		if (empty($this->entity)) return null;
+	/*
+	 *	Convert passed $data structure into coresponding entity object.
+	 *	@param $data Hash to be converted. If omitted, $this->data will be converted.
+	 *	@returns Entity object
+	 */
+	public function toEntity($data = null) {
+		if (is_null($data)) {
+			$data = $this->data;
+		}
+		
+		$class = $this->entityClass();
+		if (empty($class)) return null;
 		
 		if (empty($data[$this->name]['id'])) return null;
 		
-		$class = $this->entity;
 		if (!class_exists($class)) {
 			if (!App::import('Model', $class)) {
 				return null;
@@ -26,7 +34,7 @@ class EntityModel extends EntityAppModel {
 	public function toEntities($list_of_data) {
 		$result = array();
 		foreach ($list_of_data as $data) {
-			$result[] = $this->toEntity($data);
+			$result[] = (is_null($data) ? null : $this->toEntity($data));
 		}
 		return $result;
 	}
@@ -40,11 +48,15 @@ class EntityModel extends EntityAppModel {
 	public function afterFind($result, $primary) {
 		$result = parent::afterFind($result, $primary);
 		
-		if ($this->convertToEntity and $primary and !empty($this->entity)) {
+		if ($this->convertToEntity and $primary) {
 			$result = $this->toEntities($result);
 		}
 		
 		return $result;
+	}
+	
+	public function entityClass() {
+		return $this->name. 'Entity';
 	}
 	
 	public function call__($method, $params) {
@@ -59,7 +71,7 @@ class EntityModel extends EntityAppModel {
 		
 		$return = parent::call__($method, $params);
 		
-		if ($to_entity) {
+		if ($to_entity and !is_null($return)) {
 			$return = ($all ? $this->toEntities($return) : $this->toEntity($return));
 		}
 		

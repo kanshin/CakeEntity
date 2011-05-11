@@ -2,13 +2,13 @@
 
 class Entity extends Object implements ArrayAccess {
 	/**
-	 *	エンティティを生成する。
+	 *	Initialize entity attibutes.
 	 *	
-	 *	@param $model 元となるモデル
-	 *	@param $data Modelが返す$data配列
+	 *	@param $model base model object
+	 *	@param $data array of data, same structure with the one returned by find('first')
 	 */
 	public function init($model, $data) {
-		assert('is_a($model, "AppModel")');
+		assert('is_a($model, "EntityModel")');
 		assert('is_array($data)');
 		
 		foreach ($data as $modelClass => $values) {
@@ -45,12 +45,14 @@ class Entity extends Object implements ArrayAccess {
 		return $html;
 	}
 	
+	// ArrayAccess implementations ===========================
+	
 	public function offsetExists($offset) {
-		return true;
+		return isset($this->{$offset});
 	}
 	
 	public function offsetGet($offset) {
-		return empty($this->{$offset}) ? null : $this->{$offset};
+		return isset($this->{$offset}) ? $this->{$offset} : null;
 	}
 	
 	public function offsetSet($offset, $value) {
