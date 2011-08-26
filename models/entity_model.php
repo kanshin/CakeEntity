@@ -59,11 +59,20 @@ class EntityModel extends EntityAppModel {
 		return $this->name. 'Entity';
 	}
 	
+	public function allEntities($params = array()) {
+		$params['entity'] = true;
+		return $this->find('all', $params);
+	}
+	
+	public function entities($params = array()) {
+		return $this->allEntities($params);
+	}
+	
 	public function call__($method, $params) {
 		$to_entity = false;
 		$all = false;
 		
-		if (preg_match('/^(entity|allentities)by(.+)$/i', $method, $matches)) {
+		if (preg_match('/^(entity|(?:all)?entities)by(.+)$/i', $method, $matches)) {
 			$to_entity = true;
 			$all = (strtolower($matches[1]) == 'allentities');
 			$method = ($all ? 'findAllBy' : 'findBy'). $matches[2];
