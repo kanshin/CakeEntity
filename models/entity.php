@@ -21,13 +21,16 @@ class Entity extends Object implements ArrayAccess {
 			} else {
 				// 別のクラスのデータだったら、そのクラスのエンティティとして登録する
 				
-				$another = ClassRegistry::init($modelClass);
-				$name = strtolower($modelClass);
-				
-				if ($another and is_a($another, 'EntityModel')) {
-					$values = $another->toEntity(array($modelClass => $values));
+				if (!empty($model->hasOne[$modelClass])) {
+					$anotherModelClass = $model->hasOne[$modelClass]['className'];
+					
+					$another = ClassRegistry::init($anotherModelClass);
+					$name = strtolower($modelClass);
+					
+					if ($another and is_a($another, 'EntityModel')) {
+						$values = $another->toEntity(array($anotherModelClass => $values));
+					}
 				}
-				
 				
 				$this->{$name} = $values;
 			}
