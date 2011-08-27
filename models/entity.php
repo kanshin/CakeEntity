@@ -1,6 +1,20 @@
 <?php
 
 class Entity extends Object implements ArrayAccess {
+	public function allows() {
+		return array();
+	}
+	
+	public function isAllowed($method) {
+		if (!method_exists($this, $method)) return false;
+		
+		$allows = $this->allows();
+		if (empty($allows)) return false;
+		if ($allows == '*') return true;
+		
+		return in_array($method, $allows);
+	}
+	
 	public $_modelName_;
 	
 	/**
@@ -29,17 +43,77 @@ class Entity extends Object implements ArrayAccess {
 				$association = $model->findAssociation($modelClass);
 				if ($association) {
 					$anotherModelClass = $association['className'];
-					
 					$another = ClassRegistry::init($anotherModelClass);
 					
 					if ($another and is_a($another, 'EntityModel')) {
-						$values = $another->entity(array($anotherModelClass => $values));
+						switch ($association['type']) {
+							case 'hasOne':
+							case 'belongsTo':
+								$data = array($anotherModelClass => $values);
+								$values = $another->entity($data);
+								break;
+								
+							case 'hasMany':
+								$result = array();
+								foreach ($values as $columns) {
+									$data = array($anotherModelClass => $columns);
+									$result[] = $another->entity($data);
+								}
+								$values = $result;
+								break;
+						}
 					}
 				}
 				
 				$this->{$name} = $values;
 			}
 		}
+	}
+	
+	public function fetchAssociation($associationName, $params=array()) {
+		$association = $this->getModel()->findAssociation($associationName);
+		if (!$association) {
+			throw new Exception("Cannot find association '$associationName'.");
+		}
+		
+		$modelClass = $association['className'];
+		$model = ClassRegistry::init($modelClass);
+		if (!$model) {
+			throw new Exception("Cannot find model '$modelClass'. Bad association defenition.");
+		}
+		
+		if (is_a($model, 'EntityModel')) {
+			$params['entity'] = true;
+			
+			switch ($association['type']) {
+				case 'hasOne':
+					$result = $model->find('first', $params);
+					break;
+					
+				case 'belongsTo':
+					$result = $model->find('first', $params);
+					break;
+					
+				case 'hasMany':
+					$result = $model->find('all', $params);
+					break;
+			}
+		} else {
+			switch ($association['type']) {
+				case 'hasOne':
+				case 'belongsTo':
+					$type = 'first';
+					break;
+					
+				case 'hasMany':
+					$type = 'all';
+					break;
+			}
+			
+			$result = $model->find($type, $params);
+		}
+		
+		return $result;
 	}
 	
 	public function getModel() {
@@ -57,14 +131,41 @@ class Entity extends Object implements ArrayAccess {
 		return $html;
 	}
 	
+	// Magic actions =========================================
+	
+	private function magicExists($key) {
+		if ($key[0] == '_') return false;
+		if (isset($this->{$key})) return true;
+		if ($this->isAllowed($key)) return true;
+		return false;
+	}
+	
+	private function magicFetch($key) {
+		if ($key[0] == '_') return null;
+		
+		if (isset($this->{$key})) {
+			return $this->{$key};
+		}
+		
+		if ($this->isAllowed($key)) {
+			return $this->{$key}();
+		}
+		
+		return null;
+	}
+	
+	public function __get($name) {
+		return $this->magicFetch($name);
+	}
+	
 	// ArrayAccess implementations ===========================
 	
 	public function offsetExists($offset) {
-		return isset($this->{$offset});
+		return $this->magicExists($offset);
 	}
 	
 	public function offsetGet($offset) {
-		return isset($this->{$offset}) ? $this->{$offset} : null;
+		return $this->magicFetch($offset);
 	}
 	
 	public function offsetSet($offset, $value) {

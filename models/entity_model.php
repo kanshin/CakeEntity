@@ -114,11 +114,18 @@ class EntityModel extends EntityAppModel {
 	
 	public function findAssociation($modelClass) {
 		if (!empty($this->hasOne[$modelClass])) {
-			return $this->hasOne[$modelClass];
+			return $this->hasOne[$modelClass]
+				+ array('type' => 'hasOne');
 		}
 		
 		if (!empty($this->belongsTo[$modelClass])) {
-			return $this->belongsTo[$modelClass];
+			return $this->belongsTo[$modelClass]
+				+ array('type' => 'belongsTo');
+		}
+		
+		if (!empty($this->hasMany[$modelClass])) {
+			return $this->hasMany[$modelClass]
+				+ array('type' => 'hasMany');
 		}
 		
 		return null;
