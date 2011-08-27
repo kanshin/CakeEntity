@@ -7,7 +7,7 @@ class Entity extends Object implements ArrayAccess {
 	 *	@param $model base model object
 	 *	@param $data array of data, same structure with the one returned by find('first')
 	 */
-	public function init($model, $data) {
+	public function init(EntityModel $model, $data) {
 		assert('is_a($model, "EntityModel")');
 		assert('is_array($data)');
 		
@@ -21,11 +21,13 @@ class Entity extends Object implements ArrayAccess {
 			} else {
 				// 別のクラスのデータだったら、そのクラスのエンティティとして登録する
 				
-				if (!empty($model->hasOne[$modelClass])) {
-					$anotherModelClass = $model->hasOne[$modelClass]['className'];
+				$name = strtolower($modelClass);
+				
+				$association = $model->findAssociation($modelClass);
+				if ($association) {
+					$anotherModelClass = $association['className'];
 					
 					$another = ClassRegistry::init($anotherModelClass);
-					$name = strtolower($modelClass);
 					
 					if ($another and is_a($another, 'EntityModel')) {
 						$values = $another->toEntity(array($anotherModelClass => $values));

@@ -86,5 +86,17 @@ class EntityModel extends EntityAppModel {
 		
 		return $return;
 	}
+	
+	public function findAssociation($modelClass) {
+		if (!empty($this->hasOne[$modelClass])) {
+			return $this->hasOne[$modelClass];
+		}
+		
+		if (!empty($this->belongsTo[$modelClass])) {
+			return $this->belongsTo[$modelClass];
+		}
+		
+		return null;
+	}
 }
 
