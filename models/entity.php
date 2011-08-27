@@ -1,6 +1,8 @@
 <?php
 
 class Entity extends Object implements ArrayAccess {
+	public $_modelName_;
+	
 	/**
 	 *	Initialize entity attibutes.
 	 *	
@@ -8,8 +10,9 @@ class Entity extends Object implements ArrayAccess {
 	 *	@param $data array of data, same structure with the one returned by find('first')
 	 */
 	public function init(EntityModel $model, $data) {
-		assert('is_a($model, "EntityModel")');
 		assert('is_array($data)');
+		
+		$this->_modelName_ = $model->name;
 		
 		foreach ($data as $modelClass => $values) {
 			if ($modelClass == $model->name) {
@@ -21,7 +24,7 @@ class Entity extends Object implements ArrayAccess {
 			} else {
 				// 別のクラスのデータだったら、そのクラスのエンティティとして登録する
 				
-				$name = strtolower($modelClass);
+				$name = Inflector::underscore($modelClass);
 				
 				$association = $model->findAssociation($modelClass);
 				if ($association) {
@@ -30,13 +33,17 @@ class Entity extends Object implements ArrayAccess {
 					$another = ClassRegistry::init($anotherModelClass);
 					
 					if ($another and is_a($another, 'EntityModel')) {
-						$values = $another->toEntity(array($anotherModelClass => $values));
+						$values = $another->entity(array($anotherModelClass => $values));
 					}
 				}
 				
 				$this->{$name} = $values;
 			}
 		}
+	}
+	
+	public function getModel() {
+		return ClassRegistry::init($this->_modelName_);
 	}
 	
 	public function __toString() {

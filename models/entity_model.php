@@ -10,33 +10,40 @@ class EntityModel extends EntityAppModel {
 	 *	@param $data Hash to be converted. If omitted, $this->data will be converted.
 	 *	@returns Entity object
 	 */
-	public function toEntity($data = null) {
+	protected function toEntity($data = null) {
 		if (is_null($data)) {
 			$data = $this->data;
 		}
 		
-		$class = $this->entityClass();
-		if (empty($class)) return null;
-		
 		if (empty($data[$this->name]['id'])) return null;
+		
+		return $this->entity($data);
+	}
+	
+	protected function toEntities($list_of_data) {
+		$result = array();
+		foreach ($list_of_data as $data) {
+			$result[] = (is_null($data) ? null : $this->toEntity($data));
+		}
+		return $result;
+	}
+	
+	public function entity($data = null) {
+		if ($data) {
+			$class = $this->entityClassForData($data[$this->name]);
+		} else {
+			$class = $this->entityClass();
+		}
 		
 		if (!class_exists($class)) {
 			if (!App::import('Model', $class)) {
-				return null;
+				$class = 'Entity';
 			}
 		}
 		
 		$entity = new $class();
 		$entity->init($this, $data);
 		return $entity;
-	}
-	
-	public function toEntities($list_of_data) {
-		$result = array();
-		foreach ($list_of_data as $data) {
-			$result[] = (is_null($data) ? null : $this->toEntity($data));
-		}
-		return $result;
 	}
 	
 	public function beforeFind($queryData) {
@@ -55,8 +62,12 @@ class EntityModel extends EntityAppModel {
 		return $result;
 	}
 	
-	public function entityClass() {
+	protected function entityClass() {
 		return $this->name. 'Entity';
+	}
+	
+	protected function entityClassForData($data) {
+		return $this->entityClass();
 	}
 	
 	public function allEntities($params = array()) {
