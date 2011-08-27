@@ -98,6 +98,20 @@ class EntityModel extends EntityAppModel {
 		return $return;
 	}
 	
+	public function paginate($conditions, $fields, $order, $limit, $page, $recursive, $extra) {
+		$params = compact('conditions', 'fields', 'order', 'limit', 'page');
+		
+		if ($recursive != $this->recursive) {
+			$params['recursive'] = $recursive;
+		}
+		
+		$type = !empty($extra['type']) ? $extra['type'] : 'all';
+		
+		$params['entity'] = true;
+		
+		return $this->find($type, array_merge($params, $extra));
+	}
+	
 	public function findAssociation($modelClass) {
 		if (!empty($this->hasOne[$modelClass])) {
 			return $this->hasOne[$modelClass];
