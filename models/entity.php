@@ -29,7 +29,7 @@ class Entity extends Object implements ArrayAccess {
 		$this->_modelName_ = $model->name;
 		
 		foreach ($data as $modelClass => $values) {
-			if ($modelClass == $model->name) {
+			if ($modelClass == $model->alias) {
 				// 自分のクラスのデータだったら、プロパティとして登録する
 				
 				foreach ($values as $key => $val) {
