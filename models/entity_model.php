@@ -112,6 +112,13 @@ class EntityModel extends EntityAppModel {
 		return $this->find($type, array_merge($params, $extra));
 	}
 	
+	public function count($conditions = null) {
+		return $this->find('count', array(
+			'conditions' => $conditions, 
+			'recursive' => -1
+		));
+	}
+	
 	public function getAssociationData($name) {
 		foreach ($this->__associations as $type) {
 			if (!empty($this->{$type}[$name])) {
