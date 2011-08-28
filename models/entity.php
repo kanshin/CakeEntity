@@ -61,6 +61,7 @@ class Entity extends Object implements ArrayAccess {
 									$data = array($anotherModelClass => $columns);
 									$result[] = $another->entity($data);
 								}
+								$name = Inflector::pluralize($name);
 								$values = $result;
 								break;
 						}
