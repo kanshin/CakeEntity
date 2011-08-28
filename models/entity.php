@@ -40,7 +40,7 @@ class Entity extends Object implements ArrayAccess {
 				
 				$name = Inflector::underscore($modelClass);
 				
-				$association = $model->findAssociation($modelClass);
+				$association = $model->getAssociationData($modelClass);
 				if ($association) {
 					$anotherModelClass = $association['className'];
 					$another = ClassRegistry::init($anotherModelClass);

@@ -112,20 +112,11 @@ class EntityModel extends EntityAppModel {
 		return $this->find($type, array_merge($params, $extra));
 	}
 	
-	public function findAssociation($modelClass) {
-		if (!empty($this->hasOne[$modelClass])) {
-			return $this->hasOne[$modelClass]
-				+ array('type' => 'hasOne');
-		}
-		
-		if (!empty($this->belongsTo[$modelClass])) {
-			return $this->belongsTo[$modelClass]
-				+ array('type' => 'belongsTo');
-		}
-		
-		if (!empty($this->hasMany[$modelClass])) {
-			return $this->hasMany[$modelClass]
-				+ array('type' => 'hasMany');
+	public function getAssociationData($name) {
+		foreach ($this->__associations as $type) {
+			if (!empty($this->{$type}[$name])) {
+				return $this->{$type}[$name] + array('type' => $type, 'name' => $name);
+			}
 		}
 		
 		return null;
