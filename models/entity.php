@@ -8,6 +8,8 @@ class Entity extends Object implements ArrayAccess {
 	public function isAllowed($method) {
 		if (!method_exists($this, $method)) return false;
 		
+		if (property_exists($this, $method)) return true;
+		
 		$allows = $this->allows();
 		if (empty($allows)) return false;
 		if ($allows == '*') return true;
@@ -148,7 +150,13 @@ class Entity extends Object implements ArrayAccess {
 		}
 		
 		if ($this->isAllowed($key)) {
-			return $this->{$key}();
+			$value = $this->{$key}();
+			
+			// if property exists, this means cache the result of method.
+			if (property_exists($this, $key)) {
+				$this->{$key} = $value;
+			}
+			return $value;
 		}
 		
 		return null;
