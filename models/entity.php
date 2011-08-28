@@ -73,52 +73,6 @@ class Entity extends Object implements ArrayAccess {
 		}
 	}
 	
-	public function fetchAssociation($associationName, $params=array()) {
-		$association = $this->getModel()->findAssociation($associationName);
-		if (!$association) {
-			throw new Exception("Cannot find association '$associationName'.");
-		}
-		
-		$modelClass = $association['className'];
-		$model = ClassRegistry::init($modelClass);
-		if (!$model) {
-			throw new Exception("Cannot find model '$modelClass'. Bad association defenition.");
-		}
-		
-		if (is_a($model, 'EntityModel')) {
-			$params['entity'] = true;
-			
-			switch ($association['type']) {
-				case 'hasOne':
-					$result = $model->find('first', $params);
-					break;
-					
-				case 'belongsTo':
-					$result = $model->find('first', $params);
-					break;
-					
-				case 'hasMany':
-					$result = $model->find('all', $params);
-					break;
-			}
-		} else {
-			switch ($association['type']) {
-				case 'hasOne':
-				case 'belongsTo':
-					$type = 'first';
-					break;
-					
-				case 'hasMany':
-					$type = 'all';
-					break;
-			}
-			
-			$result = $model->find($type, $params);
-		}
-		
-		return $result;
-	}
-	
 	public function getModel() {
 		return ClassRegistry::init($this->_modelName_);
 	}
