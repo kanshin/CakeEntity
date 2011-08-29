@@ -69,11 +69,12 @@ class Entity extends Object implements ArrayAccess {
 		return false;
 	}
 	
-	private function magicFetch($key) {
+	private function magicFetch($key, &$value) {
 		if ($key[0] == '_') return null;
 		
 		if (isset($this->{$key})) {
-			return $this->{$key};
+			$value = $this->{$key};
+			return true;
 		}
 		
 		if ($this->isAllowed($key)) {
@@ -83,32 +84,65 @@ class Entity extends Object implements ArrayAccess {
 			if (property_exists($this, $key)) {
 				$this->{$key} = $value;
 			}
+			return true;
+		}
+		
+		return false;
+	}
+	
+	// ArrayAccess implementations ===========================
+	
+	public function offsetExists($key) {
+		return $this->magicExists($key);
+	}
+	
+	public function offsetGet($key) {
+		if ($this->magicFetch($key, $value)) {
 			return $value;
+		}
+		
+		if (self::$modifier == null) {
+			self::$modifier = new EntityModifier();
+			self::$modifierMethods = get_class_methods(self::$modifier);
+		}
+		
+		foreach (self::$modifierMethods as $method) {
+			if (self::$modifier->{$method}($this, $key, $value)) {
+				return $value;
+			}
 		}
 		
 		return null;
 	}
 	
-	public function __get($name) {
-		return $this->magicFetch($name);
+	public function offsetSet($key, $value) {
+		$this->{$key} = $value;
 	}
 	
-	// ArrayAccess implementations ===========================
-	
-	public function offsetExists($offset) {
-		return $this->magicExists($offset);
+	public function offsetUnset($key) {
+		unset($this->{$key});
 	}
 	
-	public function offsetGet($offset) {
-		return $this->magicFetch($offset);
-	}
-	
-	public function offsetSet($offset, $value) {
-		$this->{$offset} = $value;
-	}
-	
-	public function offsetUnset($offset) {
-		unset($this->{$offset});
+	static protected $modifier = null;
+	static protected $modifierMethods = null;
+}
+
+class EntityModifier {
+	public function reverse($entity, $key, &$value) {
+		if (!preg_match('/^reverse_(.+)$/', $key, $match)) return false;
+		
+		$key = $match[1];
+		$value = $entity[$key];
+		if (is_null($value)) return false;
+		
+		if (is_array($value)) {
+			$value = array_reverse($value);
+		} else {
+			$value = implode('', array_reverse(str_split(strval($value))));
+			
+		}
+		
+		return true;
 	}
 }
 
