@@ -17,7 +17,7 @@ class Entity extends Object implements ArrayAccess {
 		return in_array($method, $allows);
 	}
 	
-	public $_modelName_;
+	public $_name_;
 	
 	/**
 	 *	Initialize entity attibutes.
@@ -28,7 +28,7 @@ class Entity extends Object implements ArrayAccess {
 	public function init(EntityModel $model, $data) {
 		assert('is_array($data)');
 		
-		$this->_modelName_ = $model->name;
+		$this->_name_ = $model->name;
 		
 		foreach ($data as $modelClass => $values) {
 			if ($modelClass == $model->alias) {
@@ -46,7 +46,7 @@ class Entity extends Object implements ArrayAccess {
 	}
 	
 	public function getModel() {
-		return ClassRegistry::init($this->_modelName_);
+		return ClassRegistry::init($this->_name_);
 	}
 	
 	public function __toString() {
