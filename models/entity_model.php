@@ -119,6 +119,38 @@ class EntityModel extends EntityAppModel {
 		));
 	}
 	
+	public function assignAttribute(Entity $entity, $original_name, $value) {
+		$name = Inflector::underscore($original_name);
+		
+		$association = $this->getAssociationData($original_name);
+		if ($association) {
+			$anotherModelClass = $association['className'];
+			$another = ClassRegistry::init($anotherModelClass);
+			
+			if ($another and is_a($another, 'EntityModel')) {
+				switch ($association['type']) {
+					case 'hasOne':
+					case 'belongsTo':
+						$data = array($anotherModelClass => $value);
+						$value = $another->entity($data);
+						break;
+						
+					case 'hasMany':
+						$result = array();
+						foreach ($value as $columns) {
+							$data = array($anotherModelClass => $columns);
+							$result[] = $another->entity($data);
+						}
+						$name = Inflector::pluralize($name);
+						$value = $result;
+						break;
+				}
+			}
+		}
+		
+		$entity->{$name} = $value;
+	}
+	
 	public function getAssociationData($name) {
 		foreach ($this->__associations as $type) {
 			if (!empty($this->{$type}[$name])) {

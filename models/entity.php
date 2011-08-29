@@ -32,43 +32,15 @@ class Entity extends Object implements ArrayAccess {
 		
 		foreach ($data as $modelClass => $values) {
 			if ($modelClass == $model->alias) {
-				// 自分のクラスのデータだったら、プロパティとして登録する
+				// 自分のクラスのデータだったら、ここの値を属性として登録する
 				
 				foreach ($values as $key => $val) {
-					$this->{$key} = $val;
+					$model->assignAttribute($this, $key, $val);
 				}
 			} else {
 				// 別のクラスのデータだったら、そのクラスのエンティティとして登録する
 				
-				$name = Inflector::underscore($modelClass);
-				
-				$association = $model->getAssociationData($modelClass);
-				if ($association) {
-					$anotherModelClass = $association['className'];
-					$another = ClassRegistry::init($anotherModelClass);
-					
-					if ($another and is_a($another, 'EntityModel')) {
-						switch ($association['type']) {
-							case 'hasOne':
-							case 'belongsTo':
-								$data = array($anotherModelClass => $values);
-								$values = $another->entity($data);
-								break;
-								
-							case 'hasMany':
-								$result = array();
-								foreach ($values as $columns) {
-									$data = array($anotherModelClass => $columns);
-									$result[] = $another->entity($data);
-								}
-								$name = Inflector::pluralize($name);
-								$values = $result;
-								break;
-						}
-					}
-				}
-				
-				$this->{$name} = $values;
+				$model->assignAttribute($this, $modelClass, $values);
 			}
 		}
 	}
