@@ -49,6 +49,14 @@ class Entity extends Object implements ArrayAccess {
 		return ClassRegistry::init($this->_name_);
 	}
 	
+	// Authorization =========================================
+	
+	public function isAuthorized($requester, $action) {
+		return true;
+	}
+	
+	// Magic actions =========================================
+	
 	public function __toString() {
 		$html = '<div class="entity">';
 		foreach ((array) $this as $key => $val) {
@@ -59,8 +67,6 @@ class Entity extends Object implements ArrayAccess {
 		
 		return $html;
 	}
-	
-	// Magic actions =========================================
 	
 	private function magicExists($key) {
 		if ($key[0] == '_') return false;
