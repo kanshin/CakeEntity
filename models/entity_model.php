@@ -3,7 +3,8 @@
 App::import('Model', 'Entity.Entity');
 
 class EntityModel extends EntityAppModel {
-	protected $convertToEntity;
+	public $entity;
+	protected $savedEntity = array();
 	
 	/*
 	 *	Convert passed $data structure into coresponding entity object.
@@ -47,7 +48,10 @@ class EntityModel extends EntityAppModel {
 	}
 	
 	public function beforeFind($queryData) {
-		$this->convertToEntity = !empty($queryData['entity']);
+		$this->savedEntity[] = $this->entity;
+		if (!empty($queryData['entity'])) {
+			$this->entity = true;
+		}
 		
 		return parent::beforeFind($queryData);
 	}
@@ -55,10 +59,11 @@ class EntityModel extends EntityAppModel {
 	public function afterFind($result, $primary) {
 		$result = parent::afterFind($result, $primary);
 		
-		if ($this->convertToEntity and $primary) {
+		if ($this->entity and $primary) {
 			$result = $this->toEntities($result);
 		}
 		
+		$this->entity = array_pop($this->savedEntity);
 		return $result;
 	}
 	
@@ -106,8 +111,6 @@ class EntityModel extends EntityAppModel {
 		}
 		
 		$type = !empty($extra['type']) ? $extra['type'] : 'all';
-		
-		$params['entity'] = true;
 		
 		return $this->find($type, array_merge($params, $extra));
 	}
