@@ -49,6 +49,20 @@ class Entity extends Object implements ArrayAccess {
 		return ClassRegistry::init($this->_name_);
 	}
 	
+	public function save($fields = null) {
+		$Model = $this->getModel();
+		
+		if ($fields) {
+			foreach ((array) $fields as $field) {
+				$value = isset($this->{$field}) ? $this->{$field} : null;
+				$Model->saveField($field, $value);
+			}
+		} else {
+			$data = Set::reverse($this);
+			return $Model->save($data);
+		}
+	}
+	
 	// Authorization =========================================
 	
 	public function isAuthorized($requester, $action) {
