@@ -60,13 +60,8 @@ class EntityModel extends EntityAppModel {
 	public function afterFind($result, $primary) {
 		$result = parent::afterFind($result, $primary);
 		
-		switch ($this->findQueryType) {
-			case 'all':
-			case 'first':
-				if ($this->entity and $primary) {
-					$result = $this->convertToEntities($result);
-				}
-				break;
+		if ($this->entity and $primary and is_array($result)) {
+			$result = $this->convertToEntities($result);
 		}
 		
 		$this->restoreEntityState();
