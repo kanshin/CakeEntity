@@ -51,6 +51,7 @@ class Entity extends Object implements ArrayAccess {
 	
 	public function save($fields = null) {
 		$Model = $this->getModel();
+		$Model->id = (isset($this->id) ? $this->id : null);
 		
 		if ($fields) {
 			foreach ((array) $fields as $field) {
@@ -58,6 +59,8 @@ class Entity extends Object implements ArrayAccess {
 				$Model->saveField($field, $value);
 			}
 		} else {
+			$Model->create();
+			
 			$data = Set::reverse($this);
 			return $Model->save($data);
 		}
