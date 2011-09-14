@@ -1,7 +1,10 @@
 <?php
 
 App::import('Model', 'Entity.Entity');
-App::import('Core', 'Entity.AppEntity');
+
+if (!App::import('Model', 'AppEntity')) {
+	App::import('Core', 'Entity.AppEntity');
+}
 
 class EntityModel extends EntityAppModel {
 	public $entity;
