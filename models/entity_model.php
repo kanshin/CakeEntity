@@ -50,8 +50,8 @@ class EntityModel extends EntityAppModel {
 	public function beforeFind($queryData) {
 		$this->saveEntityState();
 		
-		if (!empty($queryData['entity'])) {
-			$this->entity = true;
+		if (isset($queryData['entity'])) {
+			$this->entity = $queryData['entity'];
 		}
 		
 		return parent::beforeFind($queryData);
@@ -110,6 +110,16 @@ class EntityModel extends EntityAppModel {
 		}
 		
 		return $return;
+	}
+	
+	public function paginateCount($conditions, $recursive, $extra) {
+		$parameters = $extra + compact('conditions');
+		if ($recursive != $this->recursive) {
+			$parameters['recursive'] = $recursive;
+		}
+		$parameters['entity'] = false;
+		
+		return $this->find('count', $parameters);
 	}
 	
 	public function paginate($conditions, $fields, $order, $limit, $page, $recursive, $extra) {
