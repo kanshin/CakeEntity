@@ -11,16 +11,16 @@ class EntityModel extends EntityAppModel {
 	 *	@param $data Hash to be converted. If omitted, $this->data will be converted.
 	 *	@returns Entity object
 	 */
-	protected function toEntity($data) {
+	protected function convertToEntity($data) {
 		if (is_null($data) or empty($data[$this->name]['id'])) return null;
 		
 		return $this->entity($data);
 	}
 	
-	protected function toEntities($list_of_data) {
+	protected function convertToEntities($list_of_data) {
 		$result = array();
 		foreach ($list_of_data as $data) {
-			$result[] = $this->toEntity($data);
+			$result[] = $this->convertToEntity($data);
 		}
 		return $result;
 	}
@@ -60,7 +60,7 @@ class EntityModel extends EntityAppModel {
 			case 'all':
 			case 'first':
 				if ($this->entity and $primary) {
-					$result = $this->toEntities($result);
+					$result = $this->convertToEntities($result);
 				}
 				break;
 		}
@@ -107,7 +107,7 @@ class EntityModel extends EntityAppModel {
 		$return = parent::call__($method, $params);
 		
 		if ($to_entity and !is_null($return)) {
-			$return = ($all ? $this->toEntities($return) : $this->toEntity($return));
+			$return = ($all ? $this->convertToEntities($return) : $this->convertToEntity($return));
 		}
 		
 		return $return;
