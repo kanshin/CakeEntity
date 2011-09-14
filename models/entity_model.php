@@ -18,6 +18,10 @@ class EntityModel extends EntityAppModel {
 	}
 	
 	protected function convertToEntities($list_of_data) {
+		if (!Set::numeric(array_keys($list_of_data))) {
+			return $this->convertToEntity($list_of_data);
+		}
+		
 		$result = array();
 		foreach ($list_of_data as $data) {
 			$result[] = $this->convertToEntity($data);
