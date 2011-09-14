@@ -1,6 +1,7 @@
 <?php
 
 App::import('Model', 'Entity.Entity');
+App::import('Core', 'Entity.AppEntity');
 
 class EntityModel extends EntityAppModel {
 	public $entity;
@@ -38,7 +39,7 @@ class EntityModel extends EntityAppModel {
 		
 		if (!class_exists($class)) {
 			if (!App::import('Model', $class)) {
-				$class = 'Entity';
+				$class = 'AppEntity';
 			}
 		}
 		
