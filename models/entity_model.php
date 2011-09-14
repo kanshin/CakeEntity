@@ -4,7 +4,7 @@ App::import('Model', 'Entity.Entity');
 
 class EntityModel extends EntityAppModel {
 	public $entity;
-	protected $savedEntity = array();
+	protected $savedEntityStates = array();
 	
 	/*
 	 *	Convert passed $data structure into coresponding entity object.
@@ -48,7 +48,8 @@ class EntityModel extends EntityAppModel {
 	}
 	
 	public function beforeFind($queryData) {
-		$this->savedEntity[] = $this->entity;
+		$this->saveEntityState();
+		
 		if (!empty($queryData['entity'])) {
 			$this->entity = true;
 		}
@@ -68,8 +69,16 @@ class EntityModel extends EntityAppModel {
 				break;
 		}
 		
-		$this->entity = array_pop($this->savedEntity);
+		$this->restoreEntityState();
 		return $result;
+	}
+	
+	protected function saveEntityState() {
+		$this->savedEntityStates[] = $this->entity;
+	}
+	
+	protected function restoreEntityState() {
+		$this->entity = array_pop($this->savedEntityStates);
 	}
 	
 	protected function entityClass() {
