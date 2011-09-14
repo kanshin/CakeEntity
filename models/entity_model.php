@@ -11,12 +11,8 @@ class EntityModel extends EntityAppModel {
 	 *	@param $data Hash to be converted. If omitted, $this->data will be converted.
 	 *	@returns Entity object
 	 */
-	protected function toEntity($data = null) {
-		if (is_null($data)) {
-			$data = $this->data;
-		}
-		
-		if (empty($data[$this->name]['id'])) return null;
+	protected function toEntity($data) {
+		if (is_null($data) or empty($data[$this->name]['id'])) return null;
 		
 		return $this->entity($data);
 	}
@@ -24,7 +20,7 @@ class EntityModel extends EntityAppModel {
 	protected function toEntities($list_of_data) {
 		$result = array();
 		foreach ($list_of_data as $data) {
-			$result[] = (is_null($data) ? null : $this->toEntity($data));
+			$result[] = $this->toEntity($data);
 		}
 		return $result;
 	}
