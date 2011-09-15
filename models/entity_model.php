@@ -33,7 +33,7 @@ class EntityModel extends EntityAppModel {
 		return $result;
 	}
 	
-	public function entity($data = null) {
+	public function entity($data = array()) {
 		if ($data) {
 			$class = $this->entityClassForData($data[$this->name]);
 		} else {
