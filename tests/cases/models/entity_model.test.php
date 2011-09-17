@@ -113,9 +113,6 @@ class AuthorEntity extends Entity {
 class PostEntity extends Entity {
 }
 
-class PostImageEntity extends Entity {
-}
-
 class PostCommentEntity extends Entity {
 }
 
@@ -238,8 +235,8 @@ class EntityModelTestCase extends CakeTestCase {
 		$this->assertEqual($s3->author->id, 345);
 		$this->assertEqual($s3->author->name, 'Bob');
 		
-		// 3c. hasOne association.
-		$this->assertTrue(is_a($s3->image, 'PostImageEntity'));
+		// 3c. hasOne association. Entity has no specific class.
+		$this->assertTrue(is_a($s3->image, 'AppEntity'));
 		$this->assertEqual($s3->image->id, 234);
 		
 		// 3d. hasMany association.
