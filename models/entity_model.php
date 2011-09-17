@@ -98,22 +98,27 @@ class EntityModel extends EntityAppModel {
 	}
 	
 	public function call__($method, $params) {
-		$to_entity = false;
-		$all = false;
-		
-		if (preg_match('/^(entity|(?:all)?entities)by(.+)$/i', $method, $matches)) {
-			$to_entity = true;
-			$all = (strtolower($matches[1]) == 'allentities');
-			$method = ($all ? 'findAllBy' : 'findBy'). $matches[2];
-		}
+		list($to_entity, $method) = $this->analyzeMethodName($method);
 		
 		$return = parent::call__($method, $params);
 		
 		if ($to_entity and !is_null($return)) {
-			$return = ($all ? $this->convertToEntities($return) : $this->convertToEntity($return));
+			$return = $this->convertToEntities($return);
 		}
 		
 		return $return;
+	}
+	
+	protected function analyzeMethodName($method) {
+		$to_entity = false;
+		
+		if (preg_match('/^(entity|(?:all)?entities)by(.+)$/i', $method, $matches)) {
+			$to_entity = true;
+			$all = (strtolower($matches[1]) != 'entity');
+			$method = ($all ? 'findAllBy' : 'findBy'). $matches[2];
+		}
+		
+		return array($to_entity, $method);
 	}
 	
 	public function paginateCount($conditions, $recursive, $extra) {

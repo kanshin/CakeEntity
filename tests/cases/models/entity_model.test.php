@@ -14,6 +14,10 @@ App::import('Model', 'Entity.EntityModel');
 
 class TestEntityModel extends EntityModel {
 	public $useTable = false;
+	
+	public function analyzeMethodName_($method) {
+		return $this->analyzeMethodName($method);
+	}
 }
 
 class Author extends TestEntityModel {
@@ -260,6 +264,55 @@ class EntityModelTestCase extends CakeTestCase {
 		// 2. OK, let's rock.
 		$s1 = $this->Post->find('first', array('entity' => true));
 		$this->assertTrue(is_a($s1, 'PostEntity'));
+		
+		// 3. find all.
+		$result = $this->Post->find('all', array('entity' => true));
+		$this->assertTrue(is_array($result));
+		$this->assertEqual(count($result), 3);
+		$this->assertTrue(is_a($result[0], 'PostEntity'));
+		$this->assertEqual($result[2]->title, 'again');
+		
+	}
+	
+	public function testFetchEntities() {
+		// 1. entities is shortcut for 
+		// find('all') with entitiy => true.
+		
+		$result = $this->Post->entities();
+		$this->assertTrue(is_array($result));
+		$this->assertEqual(count($result), 3);
+		$this->assertTrue(is_a($result[0], 'PostEntity'));
+		$this->assertEqual($result[2]->title, 'again');
+		
+		// 2. allEntities is alias for entities.
+		
+		$result = $this->Post->allEntities();
+		$this->assertTrue(is_array($result));
+		$this->assertEqual(count($result), 3);
+		$this->assertTrue(is_a($result[0], 'PostEntity'));
+		$this->assertEqual($result[2]->title, 'again');
+	}
+	
+	public function testMagicFetch() {
+		// 1. entitesByName
+		$result = $this->Post->analyzeMethodName_('entitiesByName');
+		$this->assertTrue($result[0]);
+		$this->assertEqual($result[1], 'findAllByName');
+		
+		// 2. allEntitesByName
+		$result = $this->Post->analyzeMethodName_('allEntitiesByName');
+		$this->assertTrue($result[0]);
+		$this->assertEqual($result[1], 'findAllByName');
+		
+		// 3. entityByName
+		$result = $this->Post->analyzeMethodName_('entityByName');
+		$this->assertTrue($result[0]);
+		$this->assertEqual($result[1], 'findByName');
+		
+		// 4. findByName
+		$result = $this->Post->analyzeMethodName_('findByName');
+		$this->assertFalse($result[0]);
+		$this->assertEqual($result[1], 'findByName');
 		
 	}
 	
