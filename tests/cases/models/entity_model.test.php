@@ -243,10 +243,12 @@ class SampleData {
 class EntityModelTestCase extends CakeTestCase {
 	public function startTest() {
 		$this->Post = ClassRegistry::init('Post');
+		$this->Author = ClassRegistry::init('Author');
 	}
 	
 	public function endTest() {
 		unset($this->Post);
+		unset($this->Author);
 		ClassRegistry::flush();
 	}
 	
@@ -391,6 +393,11 @@ class EntityModelTestCase extends CakeTestCase {
 		$this->assertEqual($s->func1, 'result1');
 	}
 	
+	/**
+	 *	Entity'property access is controlled by allows().
+	 *	This is used by isAllowed($methodName).
+	 *	Entity class can override allows() to control access.
+	 */
 	public function testAllowPropertyAccess() {
 		$s = $this->Post->entity();
 		
@@ -441,6 +448,31 @@ class EntityModelTestCase extends CakeTestCase {
 		$s->allows = array('func4');
 		
 		$this->assertFalse($s->isAllowed('func4'));	// func4 is protected
+	}
+	
+	/**
+	 *	For convenience at debug time, entity is converted into html
+	 *	when it used as string.
+	 */
+	public function testStringReplesentationOfEntity() {
+		$a = $this->Author->entity();
+		
+		// 1. empty entity
+		$expected = '<div class="Author"></div>';
+		$this->assertEqual(strval($a), $expected);
+		
+		// 2. assign entity
+		$a->name = 'Basuke';
+		
+		$expected = '<div class="Author"><strong class="key">name</strong><span clas="value">Basuke</span></div>';
+		$this->assertEqual(strval($a), $expected);
+		
+		// 3. value must be html escaped
+		$a->job = "<b>Programmer</b>";
+		
+		$expected = '<div class="Author"><strong class="key">name</strong><span clas="value">Basuke</span><strong class="key">job</strong><span clas="value">&lt;b&gt;Programmer&lt;/b&gt;</span></div>';
+		$this->assertEqual(strval($a), $expected);
+		
 	}
 	
 	public function testEntityGetModel() {

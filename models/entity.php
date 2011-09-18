@@ -75,10 +75,10 @@ class Entity extends Object implements ArrayAccess {
 	// Magic actions =========================================
 	
 	public function __toString() {
-		$html = '<div class="entity">';
-		foreach ((array) $this as $key => $val) {
+		$html = '<div class="'. $this->_name_. '">';
+		foreach (EntityAccessor::properties($this) as $key => $val) {
 			$html .= '<strong class="key">'. h($key). '</strong>'
-					.'<span clas="value">'. h(strval($val)). '</span> ';
+					.'<span clas="value">'. h(strval($val)). '</span>';
 		}
 		$html .= '</div>';
 		
@@ -167,6 +167,12 @@ class EntityAccessor {
 		} catch (ReflectionException $e) {
 		}
 		return false;
+	}
+	
+	static public function properties(Entity $entity) {
+		$properties = get_object_vars($entity);
+		unset($properties['_name_']);
+		return $properties;
 	}
 }
 
