@@ -6,9 +6,9 @@ class Entity extends Object implements ArrayAccess {
 	}
 	
 	public function isAllowed($method) {
-		if (!method_exists($this, $method)) return false;
+		if (!EntityAccessor::methodExists($this, $method)) return false;
 		
-		if (property_exists($this, $method)) return true;
+		if (EntityAccessor::propertyExists($this, $method)) return true;
 		
 		$allows = $this->allows();
 		if (empty($allows)) return false;
@@ -104,7 +104,7 @@ class Entity extends Object implements ArrayAccess {
 			$value = $this->{$key}();
 			
 			// if property exists, this means cache the result of method.
-			if (property_exists($this, $key)) {
+			if (EntityAccessor::propertyExists($this, $key)) {
 				$this->{$key} = $value;
 			}
 			return true;
@@ -148,6 +148,26 @@ class Entity extends Object implements ArrayAccess {
 	
 	static protected $modifier = null;
 	static protected $modifierMethods = null;
+}
+
+class EntityAccessor {
+	static public function methodExists(Entity $entity, $method) {
+		try {
+			$ref = new ReflectionMethod($entity, $method);
+			return $ref->isPublic();
+		} catch (ReflectionException $e) {
+		}
+		return false;
+	}
+	
+	static public function propertyExists(Entity $entity, $property) {
+		try {
+			$ref = new ReflectionProperty($entity, $property);
+			return $ref->isPublic();
+		} catch (ReflectionException $e) {
+		}
+		return false;
+	}
 }
 
 class EntityModifier {

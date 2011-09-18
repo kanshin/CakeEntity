@@ -115,6 +115,42 @@ class AuthorEntity extends Entity {
 }
 
 class PostEntity extends Entity {
+	// allows access of 'func2'.
+	public $allows = array('func2');
+	
+	public function allows() {
+		return $this->allows;
+	}
+	
+	/**
+	 *	Function with public property is ok to access.
+	 */
+	public $func1;
+	public function func1() {
+		return 'result1';
+	}
+	
+	/**
+	 *	Function listed in allows() is ok to access.
+	 */
+	public function func2() {
+		return 'result2';
+	}
+	
+	/**
+	 *	Function without public property, and not isAllowed().
+	 */
+	public function func3() {
+		return 'result3';
+	}
+	
+	/**
+	 *	Protected function can not be accessed.
+	 */
+	public $func4;
+	protected function func4() {
+		return 'result4';
+	}
 }
 
 class PostCommentEntity extends Entity {
@@ -261,7 +297,7 @@ class EntityModelTestCase extends CakeTestCase {
 		$this->assertTrue(is_array($result));
 		$this->assertEqual($result['Post']['title'], 'Hello');
 		
-		// 2. OK, let's rock.
+		// 2. OK, let's roll.
 		$s1 = $this->Post->find('first', array('entity' => true));
 		$this->assertTrue(is_a($s1, 'PostEntity'));
 		
@@ -314,6 +350,97 @@ class EntityModelTestCase extends CakeTestCase {
 		$this->assertFalse($result[0]);
 		$this->assertEqual($result[1], 'findByName');
 		
+	}
+	
+	public function testEntityArrayAccess() {
+		$s = $this->Post->entity();
+		
+		// 1. Simple array access.
+		$s->name = 'Hello';
+		$this->assertTrue(isset($s->name));
+		$this->assertTrue(isset($s['name']));
+		$this->assertEqual($s['name'], 'Hello');
+		
+		// 2. Non-exist attribute is not exists.
+		$this->assertFalse(isset($s->foobar));
+		$this->assertFalse(isset($s['foobar']));
+		
+		// 3. Set by array access.
+		$s['title'] = 'World';
+		$this->assertEqual($s['title'], 'World');
+		$this->assertEqual($s->title, 'World');
+		
+		// 4. Unset by array access.
+		unset($s['title']);
+		$this->assertFalse(isset($s['title']));
+		$this->assertFalse(isset($s->title));
+		
+		// 5. property start with '_' cannot by access;
+		$s->_foo = 'Bar';
+		$this->assertFalse(isset($s['_foor']));
+		
+		// 6. function can be also accessable.
+		$this->assertEqual($s['func1'], 'result1');
+		$this->assertEqual($s['func2'], 'result2');
+		$this->assertEqual($s['func3'], null);
+		$this->assertEqual($s['func4'], null);
+		
+		// 7. func1 has a public property, so it must be cached.
+		$this->func1 = null; // clear cache.
+		$this->assertEqual($s['func1'], 'result1');
+		$this->assertEqual($s->func1, 'result1');
+	}
+	
+	public function testAllowPropertyAccess() {
+		$s = $this->Post->entity();
+		
+		/**
+		 * This entity's allows() will return $this->allows, 
+		 * so changing $this->allows changes the authorization on the fly.
+		 * This is not common. Don't use this on production.
+		 */
+		
+		/**
+		 * func1 is allowed by public property, so always ok.
+		 * func4 is protected method, so always not ok.
+		 */
+		
+		// 1. allow everything
+		$s->allows = '*';
+		
+		$this->assertTrue($s->isAllowed('func1'));	// func1 is ok
+		$this->assertTrue($s->isAllowed('func2'));	// func2 is ok
+		$this->assertTrue($s->isAllowed('func3'));	// func3 is ok
+		$this->assertFalse($s->isAllowed('func4'));	// func4 is protected
+		
+		// 2. allow only func3
+		$s->allows = array('func3');
+		
+		$this->assertTrue($s->isAllowed('func1'));	// func1 is ok
+		$this->assertFalse($s->isAllowed('func2'));	// func2 is not ok
+		$this->assertTrue($s->isAllowed('func3'));	// func3 is ok
+		$this->assertFalse($s->isAllowed('func4'));	// func4 is protected
+		
+		// 3. allow both func1 and func3
+		$s->allows = array('func2', 'func3');
+		
+		$this->assertTrue($s->isAllowed('func1'));	// func1 is ok
+		$this->assertTrue($s->isAllowed('func2'));	// func2 is ok
+		$this->assertTrue($s->isAllowed('func3'));	// func3 is ok
+		$this->assertFalse($s->isAllowed('func4'));	// func4 is protected
+		
+		// 4. allow nothing
+		$s->allows = false;
+		
+		$this->assertTrue($s->isAllowed('func1'));	// func1 is ok
+		$this->assertFalse($s->isAllowed('func2'));	// func2 is not ok
+		$this->assertFalse($s->isAllowed('func3'));	// func3 is not ok
+		$this->assertFalse($s->isAllowed('func4'));	// func4 is protected
+		
+		// 5. protected method can not allow by allows().
+		$s->allows = array('func4');
+		
+		$this->assertFalse($s->isAllowed('func4'));	// func4 is protected
 	}
 	
 	public function testEntityGetModel() {
