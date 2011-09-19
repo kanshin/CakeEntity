@@ -45,6 +45,14 @@ class Entity extends Object implements ArrayAccess {
 		}
 	}
 	
+	public function isEqual($other) {
+		if (!$other) return false;
+		if (empty($other->id)) return false;
+		if (get_class($other) != get_class($this)) return false;
+		
+		return strval($other->id) == strval($this->id);
+	}
+	
 	public function getModel() {
 		return ClassRegistry::init($this->_name_);
 	}
