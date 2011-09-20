@@ -177,6 +177,13 @@ class EntityModel extends EntityAppModel {
 						break;
 				}
 			}
+		} else if (!$this->schema($original_name) and preg_match('/^[A-Z]/', $original_name)) {
+			// joins will add additional informations.
+			$another = ClassRegistry::init($original_name);
+			if ($another and is_a($another,  'EntityModel')) {
+				$data = array($original_name => $value);
+				$value = $another->entity($data);
+			}
 		}
 		
 		$entity->{$name} = $value;
