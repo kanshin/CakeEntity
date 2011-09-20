@@ -85,6 +85,10 @@ class Entity extends Object implements ArrayAccess {
 		return $html;
 	}
 	
+	public function toArray() {
+		return Set::reverse($this);
+	}
+	
 	private function magicExists($key) {
 		if ($key[0] == '_') return false;
 		if (isset($this->{$key})) return true;

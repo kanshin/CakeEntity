@@ -116,10 +116,10 @@ class AuthorEntity extends Entity {
 
 class PostEntity extends Entity {
 	// allows access of 'func2'.
-	public $allows = array('func2');
+	static public $allows = array('func2');
 	
 	public function allows() {
-		return $this->allows;
+		return self::$allows;
 	}
 	
 	/**
@@ -402,8 +402,10 @@ class EntityModelTestCase extends CakeTestCase {
 		$s = $this->Post->entity();
 		
 		/**
-		 * This entity's allows() will return $this->allows, 
-		 * so changing $this->allows changes the authorization on the fly.
+		 * This entity's allows() will return PostEntity::$allows, 
+		 * so changing PostEntity::$allows changes the authorization 
+		 * on the fly.
+		 * 
 		 * This is not common. Don't use this on production.
 		 */
 		
@@ -413,7 +415,7 @@ class EntityModelTestCase extends CakeTestCase {
 		 */
 		
 		// 1. allow everything
-		$s->allows = '*';
+		PostEntity::$allows = '*';
 		
 		$this->assertTrue($s->isAllowed('func1'));	// func1 is ok
 		$this->assertTrue($s->isAllowed('func2'));	// func2 is ok
@@ -421,7 +423,7 @@ class EntityModelTestCase extends CakeTestCase {
 		$this->assertFalse($s->isAllowed('func4'));	// func4 is protected
 		
 		// 2. allow only func3
-		$s->allows = array('func3');
+		PostEntity::$allows = array('func3');
 		
 		$this->assertTrue($s->isAllowed('func1'));	// func1 is ok
 		$this->assertFalse($s->isAllowed('func2'));	// func2 is not ok
@@ -429,7 +431,7 @@ class EntityModelTestCase extends CakeTestCase {
 		$this->assertFalse($s->isAllowed('func4'));	// func4 is protected
 		
 		// 3. allow both func1 and func3
-		$s->allows = array('func2', 'func3');
+		PostEntity::$allows = array('func2', 'func3');
 		
 		$this->assertTrue($s->isAllowed('func1'));	// func1 is ok
 		$this->assertTrue($s->isAllowed('func2'));	// func2 is ok
@@ -437,7 +439,7 @@ class EntityModelTestCase extends CakeTestCase {
 		$this->assertFalse($s->isAllowed('func4'));	// func4 is protected
 		
 		// 4. allow nothing
-		$s->allows = false;
+		PostEntity::$allows = false;
 		
 		$this->assertTrue($s->isAllowed('func1'));	// func1 is ok
 		$this->assertFalse($s->isAllowed('func2'));	// func2 is not ok
@@ -445,7 +447,7 @@ class EntityModelTestCase extends CakeTestCase {
 		$this->assertFalse($s->isAllowed('func4'));	// func4 is protected
 		
 		// 5. protected method can not allow by allows().
-		$s->allows = array('func4');
+		PostEntity::$allows = array('func4');
 		
 		$this->assertFalse($s->isAllowed('func4'));	// func4 is protected
 	}
@@ -472,6 +474,51 @@ class EntityModelTestCase extends CakeTestCase {
 		
 		$expected = '<div class="Author"><strong class="key">name</strong><span clas="value">Basuke</span><strong class="key">job</strong><span clas="value">&lt;b&gt;Programmer&lt;/b&gt;</span></div>';
 		$this->assertEqual(strval($a), $expected);
+		
+	}
+	
+	/**
+	 * Entity can be converted to model-aware data array.
+	 */
+	public function testEntityToArray() {
+		
+		// 1. simple data 
+		$data = array(
+			'Author' => array(
+				'name' => 'Basuke', 
+				'programmer' => 'Programmer', 
+			),
+		);
+		
+		$author = $this->Author->entity($data);
+		$reversed = $author->toArray();
+		$this->assertEqual($reversed, $data);
+		
+		// 2. has many
+		$data = array(
+			'Author' => array(
+				'id' => '123', 
+				'name' => 'Basuke', 
+				'programmer' => 'Programmer', 
+			),
+			'Post' => array(
+				array(
+					'id' => '1', 
+					'author_id' => '123', 
+					'title' => 'Hello', 
+				), 
+				array(
+					'id' => '2', 
+					'author_id' => '123', 
+					'title' => 'World', 
+				), 
+			),
+		);
+		
+		$author = $this->Author->entity($data);
+		$reversed = $author->toArray();
+var_dump($reversed);
+		$this->assertEqual($reversed, $data);
 		
 	}
 	
