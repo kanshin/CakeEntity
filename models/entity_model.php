@@ -35,7 +35,7 @@ class EntityModel extends EntityAppModel {
 	
 	public function entity($data = array()) {
 		if ($data) {
-			$class = $this->entityClassForData($data[$this->name]);
+			$class = $this->entityClassForData($data[$this->alias]);
 		} else {
 			$class = $this->entityClass();
 		}
@@ -150,50 +150,54 @@ class EntityModel extends EntityAppModel {
 		));
 	}
 	
-	public function assignAttribute(Entity $entity, $original_name, $value) {
-		$name = Inflector::underscore($original_name);
+	public function assignAttribute(Entity $entity, $alias, $value) {
+		$name = Inflector::underscore($alias);
 		
-		$association = $this->getAssociationData($original_name);
-		if ($association) {
-			$anotherModelClass = $association['className'];
-			$another = ClassRegistry::init($anotherModelClass);
-			
-			if ($another and is_a($another, 'EntityModel')) {
-				switch ($association['type']) {
-					case 'hasOne':
-					case 'belongsTo':
-						$data = array($anotherModelClass => $value);
-						$value = $another->entity($data);
-						break;
-						
-					case 'hasMany':
-						$result = array();
-						foreach ($value as $columns) {
-							$data = array($anotherModelClass => $columns);
-							$result[] = $another->entity($data);
-						}
-						$name = Inflector::pluralize($name);
-						$value = $result;
-						break;
+		$Model = $this->getAssociatedModel($alias);
+		if ($Model) {
+			if (Set::numeric(array_keys($value))) {
+				$result = array();
+				foreach ($value as $columns) {
+					$data = array($alias => $columns);
+					$result[] = $Model->entity($data);
 				}
-			}
-		} else if (!$this->schema($original_name) and preg_match('/^[A-Z]/', $original_name)) {
-			// joins will add additional informations.
-			$another = ClassRegistry::init($original_name);
-			if ($another and is_a($another,  'EntityModel')) {
-				$data = array($original_name => $value);
-				$value = $another->entity($data);
+				$name = Inflector::pluralize($name);
+				$value = $result;
+			} else {
+				$data = array($alias => $value);
+				$value = $Model->entity($data);
 			}
 		}
 		
 		$entity->{$name} = $value;
 	}
 	
-	public function getAssociationData($name) {
+	protected function getAssociatedModel($alias) {
+		if ($this->schema($alias) or !preg_match('/^[A-Z]/', $alias)) {
+			return null;
+		}
+		
+		$Model = null;
+		
 		foreach ($this->__associations as $type) {
-			if (!empty($this->{$type}[$name])) {
-				return $this->{$type}[$name] + array('type' => $type, 'name' => $name);
+			if (!empty($this->{$type}[$alias])) {
+				$association = $this->{$type}[$alias];
+				
+				$Model = ClassRegistry::init(array(
+					'class' => $association['className'], 
+					'alias' => $alias, 
+				));
+				
+				break;
 			}
+		}
+		
+		if (!$Model) {
+			$Model = ClassRegistry::init($alias);
+		}
+		
+		if ($Model and is_a($Model, 'EntityModel')) {
+			return $Model;
 		}
 		
 		return null;

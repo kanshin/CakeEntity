@@ -97,13 +97,6 @@ class Entity extends Object implements ArrayAccess {
 		return Set::reverse($this);
 	}
 	
-	private function magicExists($key) {
-		if ($key[0] == '_') return false;
-		if (isset($this->{$key})) return true;
-		if ($this->isAllowed($key)) return true;
-		return false;
-	}
-	
 	private function magicFetch($key, &$value) {
 		if ($key[0] == '_') return null;
 		
@@ -122,13 +115,19 @@ class Entity extends Object implements ArrayAccess {
 			return true;
 		}
 		
+		$Model = $this->getModel();
+		if ($key == $Model->alias) {
+			$value = $this;
+			return true;
+		}
+		
 		return false;
 	}
 	
 	// ArrayAccess implementations ===========================
 	
 	public function offsetExists($key) {
-		return $this->magicExists($key);
+		return $this->magicFetch($key, $value);
 	}
 	
 	public function offsetGet($key) {
