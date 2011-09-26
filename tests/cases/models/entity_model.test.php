@@ -23,8 +23,17 @@ class TestEntityModel extends EntityModel {
 class Author extends TestEntityModel {
 	public $name = 'Author';
 	
+	public $hasOne = array(
+		'Image' => array(
+			'className' => 'PostImage',
+		), 
+	);
+	
 	public $hasMany = array(
 		'Post', 
+		'Comment' => array(
+			'className' => 'PostComment',
+		), 
 	);
 }
 
@@ -512,6 +521,24 @@ class EntityModelTestCase extends CakeTestCase {
 					'author_id' => '123', 
 					'comment' => 'World', 
 				), 
+			),
+		);
+		
+		$author = $this->Author->entity($data);
+		$reversed = $author->toArray();
+		$this->assertEqual($reversed, $data);
+		
+		// 3. has one
+		$data = array(
+			'Author' => array(
+				'id' => '123', 
+				'name' => 'Basuke', 
+				'programmer' => 'Programmer', 
+			),
+			'Image' => array(
+				'id' => '1', 
+				'author_id' => '123', 
+				'url' => 'Hello', 
 			),
 		);
 		

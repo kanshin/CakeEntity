@@ -18,6 +18,7 @@ class Entity extends Object implements ArrayAccess {
 	}
 	
 	public $_name_;
+	private $model_class;
 	
 	/**
 	 *	Initialize entity attibutes.
@@ -28,7 +29,8 @@ class Entity extends Object implements ArrayAccess {
 	public function init(EntityModel $model, $data) {
 		assert('is_array($data)');
 		
-		$this->_name_ = $model->name;
+		$this->_name_ = $model->alias;
+		$this->model_class = $model->name;
 		
 		foreach ($data as $modelClass => $values) {
 			if ($modelClass == $model->alias) {
@@ -54,7 +56,11 @@ class Entity extends Object implements ArrayAccess {
 	}
 	
 	public function getModel() {
-		return ClassRegistry::init($this->_name_);
+		return ClassRegistry::init(array(
+			'class' => $this->model_class, 
+			'alias' => $this->_name_, 
+			'type' => 'Model', 
+		));
 	}
 	
 	public function save($fields = null) {
@@ -69,7 +75,7 @@ class Entity extends Object implements ArrayAccess {
 		} else {
 			$Model->create();
 			
-			$data = Set::reverse($this);
+			$data = $this->toArray();
 			return $Model->save($data);
 		}
 	}
@@ -97,8 +103,13 @@ class Entity extends Object implements ArrayAccess {
 		$data = Set::reverse($this);
 		
 		foreach (array_keys($data[$this->_name_]) as $name) {
-			// has many association
-			if (is_array($data[$this->_name_][$name]) and Set::numeric(array_keys($data[$this->_name_][$name]))) {
+			if (!is_array($data[$this->_name_][$name])) {
+				continue;
+			}
+			
+			if (Set::numeric(array_keys($data[$this->_name_][$name]))) {
+				// has many association
+				
 				$list = $data[$this->_name_][$name];
 				unset($data[$this->_name_][$name]);
 				
@@ -110,6 +121,13 @@ class Entity extends Object implements ArrayAccess {
 					}
 					$data[$name][] = $sub;
 				}
+			} else {
+				// has one association
+				
+				$sub = $data[$this->_name_][$name];
+				unset($data[$this->_name_][$name]);
+				
+				$data[$name] = $sub;
 			}
 		}
 		
