@@ -501,24 +501,23 @@ class EntityModelTestCase extends CakeTestCase {
 				'name' => 'Basuke', 
 				'programmer' => 'Programmer', 
 			),
-			'Post' => array(
+			'Comment' => array(
 				array(
 					'id' => '1', 
 					'author_id' => '123', 
-					'title' => 'Hello', 
+					'comment' => 'Hello', 
 				), 
 				array(
 					'id' => '2', 
 					'author_id' => '123', 
-					'title' => 'World', 
+					'comment' => 'World', 
 				), 
 			),
 		);
 		
 		$author = $this->Author->entity($data);
 		$reversed = $author->toArray();
-//		$this->assertEqual($reversed, $data);
-		
+		$this->assertEqual($reversed, $data);
 	}
 	
 	public function testEntityGetModel() {

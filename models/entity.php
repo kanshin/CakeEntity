@@ -94,7 +94,26 @@ class Entity extends Object implements ArrayAccess {
 	}
 	
 	public function toArray() {
-		return Set::reverse($this);
+		$data = Set::reverse($this);
+		
+		foreach (array_keys($data[$this->_name_]) as $name) {
+			// has many association
+			if (is_array($data[$this->_name_][$name]) and Set::numeric(array_keys($data[$this->_name_][$name]))) {
+				$list = $data[$this->_name_][$name];
+				unset($data[$this->_name_][$name]);
+				
+				$name = Inflector::classify($name);
+				$data[$name] = array();
+				foreach ($list as $sub) {
+					if (is_array($sub)) {
+						$sub = current($sub);
+					}
+					$data[$name][] = $sub;
+				}
+			}
+		}
+		
+		return $data;
 	}
 	
 	private function magicFetch($key, &$value) {

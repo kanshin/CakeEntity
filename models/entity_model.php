@@ -172,7 +172,7 @@ class EntityModel extends EntityAppModel {
 		$entity->{$name} = $value;
 	}
 	
-	protected function getAssociatedModel($alias) {
+	public function getAssociatedModel($alias) {
 		if ($this->schema($alias) or !preg_match('/^[A-Z]/', $alias)) {
 			return null;
 		}
