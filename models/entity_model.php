@@ -121,6 +121,21 @@ class EntityModel extends EntityAppModel {
 		return array($to_entity, $method);
 	}
 	
+	/**
+	 * Override. To support passing entity to set() directly.
+	 * Because save() will pass its data to set(), you can now
+	 * call save() with entity like this:
+	 *
+	 *    $Model->save($entity);
+	 *
+	 */
+	public function set($one, $two = null) {
+		if (is_a($one, 'Entity')) {
+			$one = $one->toArray();
+		}
+		return parent::set($one, $two);
+	}
+	
 	public function paginateCount($conditions, $recursive, $extra) {
 		$parameters = $extra + compact('conditions');
 		if ($recursive != $this->recursive) {
