@@ -70,8 +70,10 @@ class Entity extends Object implements ArrayAccess {
 		if ($fields) {
 			foreach ((array) $fields as $field) {
 				$value = isset($this->{$field}) ? $this->{$field} : null;
-				$Model->saveField($field, $value);
+				$ok = $Model->saveField($field, $value);
+				if (!$ok) return false;
 			}
+			return true;
 		} else {
 			$Model->create();
 			
