@@ -16,7 +16,7 @@ class EntityModel extends EntityAppModel {
 	 *	@returns Entity object
 	 */
 	protected function convertToEntity($data) {
-		if (is_null($data) or empty($data[$this->name]['id'])) return null;
+		if (is_null($data) or empty($data[$this->alias]['id'])) return null;
 		
 		return $this->entity($data);
 	}
