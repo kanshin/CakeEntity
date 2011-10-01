@@ -22,7 +22,7 @@ class EntityModel extends EntityAppModel {
 	}
 	
 	protected function convertToEntities($list_of_data) {
-		if (!Set::numeric(array_keys($list_of_data))) {
+		if ($list_of_data && !Set::numeric(array_keys($list_of_data))) {
 			return $this->convertToEntity($list_of_data);
 		}
 		
