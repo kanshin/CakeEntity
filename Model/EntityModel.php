@@ -1,13 +1,7 @@
 <?php
-if (!class_exists('Entity')) {
-	App::import('Model', 'Entity.Entity');
-}
 
-if (!class_exists('AppEntity')) {
-	if (!App::import('Model', 'AppEntity')) {
-		App::import('Core', 'Entity.AppEntity');
-	}
-}
+App::uses('Entity', 'Entity.Entity');
+App::uses('AppEntity', 'Entity');
 
 class EntityModel extends EntityAppModel {
 	public $entity;
