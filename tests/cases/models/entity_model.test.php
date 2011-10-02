@@ -69,7 +69,11 @@ class Post extends TestEntityModel {
 		
 		switch ($type) {
 			case 'all':
-				$result = SampleData::$arrayOfData;
+				if (isset($query['result'])) {
+					$result = $query['result'];
+				} else {
+					$result = SampleData::$arrayOfData;
+				}
 				break;
 				
 			case 'first':
@@ -319,6 +323,13 @@ class EntityModelTestCase extends CakeTestCase {
 		$this->assertTrue(is_a($result[0], 'PostEntity'));
 		$this->assertEqual($result[2]->title, 'again');
 		
+		// 4. find all with empty result.
+		$result = $this->Post->find('all', array(
+			'entity' => true, 
+			'result' => array(), 
+		));
+		$this->assertTrue(is_array($result));
+		$this->assertEqual(count($result), 0);
 	}
 	
 	public function testFetchEntities() {
