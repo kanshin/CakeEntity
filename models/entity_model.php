@@ -173,7 +173,7 @@ class EntityModel extends EntityAppModel {
 		
 		$Model = $this->getAssociatedModel($alias);
 		if ($Model) {
-			if (Set::numeric(array_keys($value))) {
+			if (is_array($value) and (empty($value) or Set::numeric(array_keys($value)))) {
 				$result = array();
 				foreach ($value as $columns) {
 					$data = array($alias => $columns);

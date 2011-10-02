@@ -227,6 +227,16 @@ class SampleData {
 		),
 	);
 	
+	public static $emptyHasManyData = array(
+		'Post' => array(
+			'id' => 123, 
+			'title' => 'Hello', 
+			'author_id' => 345, 
+		), 
+		'Comment' => array(
+		),
+	);
+	
 	public static $arrayOfData = array(
 		array(
 			'Post' => array(
@@ -303,6 +313,15 @@ class EntityModelTestCase extends CakeTestCase {
 		$this->assertEqual(count($s3->star), 2);
 		$this->assertTrue(is_array($s3->star[0]));
 		$this->assertEqual($s3->star[0]['point'], 1);
+	}
+	
+	// 4. create entity with complex data.
+	public function testCreateEntityWithEmptyHasMany() {
+		$s = $this->Post->entity(SampleData::$emptyHasManyData);
+		
+		$this->assertTrue(isset($s->comments));
+		$this->assertTrue(is_array($s->comments));
+		$this->assertEqual(count($s->comments), 0);
 	}
 	
 	public function testFind() {
