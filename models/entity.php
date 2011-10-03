@@ -88,7 +88,7 @@ class Entity extends Object implements ArrayAccess {
 	
 	public function save($fields = null) {
 		$Model = $this->getModel();
-		$Model->id = (isset($this->id) ? $this->id : null);
+		$Model->id = isset($this->id) ? $this->id : null;
 		
 		if ($fields) {
 			foreach ((array) $fields as $field) {
