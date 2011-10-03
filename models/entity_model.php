@@ -1,4 +1,5 @@
 <?php
+
 if (!class_exists('Entity')) {
 	App::import('Model', 'Entity.Entity');
 }
@@ -19,7 +20,9 @@ class EntityModel extends EntityAppModel {
 	 *	@returns Entity object
 	 */
 	protected function convertToEntity($data) {
-		if (is_null($data) || empty($data[$this->alias]['id'])) return null;
+		if (is_null($data) || empty($data[$this->alias]['id'])) {
+			return null;
+		}
 		
 		return $this->entity($data);
 	}

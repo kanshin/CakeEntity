@@ -6,13 +6,22 @@ class Entity extends Object implements ArrayAccess {
 	}
 	
 	public function isAllowed($method) {
-		if (!EntityAccessor::methodExists($this, $method)) return false;
+		if (!EntityAccessor::methodExists($this, $method)) {
+			return false;
+		}
 		
-		if (EntityAccessor::propertyExists($this, $method)) return true;
+		if (EntityAccessor::propertyExists($this, $method)) {
+			return true;
+		}
 		
 		$allows = $this->allows();
-		if (empty($allows)) return false;
-		if ($allows == '*') return true;
+		if (empty($allows)) {
+			return false;
+		}
+		
+		if ($allows == '*') {
+			return true;
+		}
 		
 		return in_array($method, $allows);
 	}
@@ -62,11 +71,19 @@ class Entity extends Object implements ArrayAccess {
 	}
 	
 	public function isEqual($other) {
-		if (!$other) return false;
-		if (empty($other->id)) return false;
-		if (get_class($other) != get_class($this)) return false;
+		if (!$other) {
+			return false;
+		}
 		
-		return strval($other->id) == strval($this->id);
+		if (empty($other->id)) {
+			return false;
+		}
+		
+		if (get_class($other) != get_class($this)) {
+			return false;
+		}
+		
+		return (strval($other->id) == strval($this->id));
 	}
 	
 	public function save($fields = null) {
@@ -77,7 +94,9 @@ class Entity extends Object implements ArrayAccess {
 			foreach ((array) $fields as $field) {
 				$value = isset($this->{$field}) ? $this->{$field} : null;
 				$ok = $Model->saveField($field, $value);
-				if (!$ok) return false;
+				if (!$ok) {
+					return false;
+				}
 			}
 			return true;
 		} else {
@@ -137,7 +156,9 @@ class Entity extends Object implements ArrayAccess {
 	}
 	
 	private function magicFetch($key, &$value) {
-		if ($key[0] == '_') return null;
+		if ($key[0] == '_') {
+			return null;
+		}
 		
 		if (isset($this->{$key})) {
 			$value = $this->{$key};
@@ -228,11 +249,15 @@ class EntityAccessor {
 
 class EntityModifier {
 	public function reverse($entity, $key, &$value) {
-		if (!preg_match('/^reverse_(.+)$/', $key, $match)) return false;
+		if (!preg_match('/^reverse_(.+)$/', $key, $match)) {
+			return false;
+		}
 		
 		$key = $match[1];
 		$value = $entity[$key];
-		if (is_null($value)) return false;
+		if (is_null($value)) {
+			return false;
+		}
 		
 		if (is_array($value)) {
 			$value = array_reverse($value);
