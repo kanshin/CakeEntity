@@ -50,7 +50,7 @@ class EntityModel extends EntityAppModel {
 		}
 		
 		$entity = new $class();
-		$entity->init($this, $data);
+		$entity->bind($this, $data);
 		return $entity;
 	}
 	
@@ -168,7 +168,7 @@ class EntityModel extends EntityAppModel {
 		));
 	}
 	
-	public function assignAttribute(Entity $entity, $alias, $value) {
+	public function assignProperty(Entity $entity, $alias, $value) {
 		$name = Inflector::underscore($alias);
 		
 		$Model = $this->getAssociatedModel($alias);

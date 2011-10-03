@@ -17,16 +17,21 @@ class Entity extends Object implements ArrayAccess {
 		return in_array($method, $allows);
 	}
 	
+	/**************************************
+	 * Model bindings					  *
+	 **************************************/
+	
 	public $_name_;
 	private $model_class;
 	
 	/**
-	 *	Initialize entity attibutes.
+	 *	Bind the entity and its source model.
 	 *	
 	 *	@param $model base model object
 	 *	@param $data array of data, same structure with the one returned by find('first')
+	 *	@access ment to be public only for EntityModel.
 	 */
-	public function init(EntityModel $model, $data) {
+	public function bind(EntityModel $model, $data) {
 		assert('is_array($data)');
 		
 		$this->_name_ = $model->alias;
@@ -34,25 +39,18 @@ class Entity extends Object implements ArrayAccess {
 		
 		foreach ($data as $modelClass => $values) {
 			if ($modelClass == $model->alias) {
-				// 自分のクラスのデータだったら、ここの値を属性として登録する
+				/* if the data is array of values for my class, 
+				   use them as a property */
 				
 				foreach ($values as $key => $val) {
-					$model->assignAttribute($this, $key, $val);
+					$model->assignProperty($this, $key, $val);
 				}
 			} else {
-				// 別のクラスのデータだったら、そのクラスのエンティティとして登録する
+				/* if not for my class, assign as another entity */
 				
-				$model->assignAttribute($this, $modelClass, $values);
+				$model->assignProperty($this, $modelClass, $values);
 			}
 		}
-	}
-	
-	public function isEqual($other) {
-		if (!$other) return false;
-		if (empty($other->id)) return false;
-		if (get_class($other) != get_class($this)) return false;
-		
-		return strval($other->id) == strval($this->id);
 	}
 	
 	public function getModel() {
@@ -61,6 +59,14 @@ class Entity extends Object implements ArrayAccess {
 			'alias' => $this->_name_, 
 			'type' => 'Model', 
 		));
+	}
+	
+	public function isEqual($other) {
+		if (!$other) return false;
+		if (empty($other->id)) return false;
+		if (get_class($other) != get_class($this)) return false;
+		
+		return strval($other->id) == strval($this->id);
 	}
 	
 	public function save($fields = null) {
@@ -80,12 +86,6 @@ class Entity extends Object implements ArrayAccess {
 			$data = $this->toArray();
 			return $Model->save($data);
 		}
-	}
-	
-	// Authorization =========================================
-	
-	public function isAuthorized($requester, $action) {
-		return true;
 	}
 	
 	// Magic actions =========================================
