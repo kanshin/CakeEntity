@@ -65,3 +65,4 @@ class Query extends Object implements ArrayAccess, IteratorAggregate, Countable 
 	}
 }
 
+?>

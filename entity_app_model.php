@@ -3,3 +3,4 @@
 class EntityAppModel extends AppModel {
 }
 
+?>

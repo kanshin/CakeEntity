@@ -586,3 +586,4 @@ class EntityModelTestCase extends CakeTestCase {
 	}
 }
 
+?>
