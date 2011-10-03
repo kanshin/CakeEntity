@@ -281,7 +281,7 @@ class EntityModelTestCase extends CakeTestCase {
 		$s1 = $this->Post->entity();
 		$this->assertTrue(is_a($s1, 'PostEntity'));
 		
-		// 2. create entity with data. Attributes can be accessed.
+		// 2. create entity with data. Properties can be accessed.
 		$s2 = $this->Post->entity(SampleData::$simpleData);
 		$this->assertTrue(is_a($s2, 'PostEntity'));
 		$this->assertEqual($s2->id, 123);
@@ -402,7 +402,7 @@ class EntityModelTestCase extends CakeTestCase {
 		$this->assertTrue(isset($s['name']));
 		$this->assertEqual($s['name'], 'Hello');
 		
-		// 2. Non-exist attribute is not exists.
+		// 2. Non-exist property is not exists.
 		$this->assertFalse(isset($s->foobar));
 		$this->assertFalse(isset($s['foobar']));
 		
@@ -586,3 +586,4 @@ class EntityModelTestCase extends CakeTestCase {
 	}
 }
 
+?>

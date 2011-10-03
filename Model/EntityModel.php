@@ -13,18 +13,20 @@ class EntityModel extends EntityAppModel {
 	 *	@returns Entity object
 	 */
 	protected function convertToEntity($data) {
-		if (is_null($data) or empty($data[$this->alias]['id'])) return null;
+		if (is_null($data) || empty($data[$this->alias]['id'])) {
+			return null;
+		}
 		
 		return $this->entity($data);
 	}
 	
-	protected function convertToEntities($list_of_data) {
-		if ($list_of_data && !Set::numeric(array_keys($list_of_data))) {
-			return $this->convertToEntity($list_of_data);
+	protected function convertToEntities($list) {
+		if ($list && !Set::numeric(array_keys($list))) {
+			return $this->convertToEntity($list);
 		}
 		
 		$result = array();
-		foreach ($list_of_data as $data) {
+		foreach ($list as $data) {
 			$result[] = $this->convertToEntity($data);
 		}
 		return $result;
@@ -44,7 +46,7 @@ class EntityModel extends EntityAppModel {
 		}
 		
 		$entity = new $class();
-		$entity->init($this, $data);
+		$entity->bind($this, $data);
 		return $entity;
 	}
 	
@@ -61,7 +63,7 @@ class EntityModel extends EntityAppModel {
 	public function afterFind($result, $primary) {
 		$result = parent::afterFind($result, $primary);
 		
-		if ($this->entity and $primary and is_array($result)) {
+		if ($this->entity && $primary && is_array($result)) {
 			$result = $this->convertToEntities($result);
 		}
 		
@@ -95,11 +97,11 @@ class EntityModel extends EntityAppModel {
 	}
 	
 	public function call__($method, $params) {
-		list($to_entity, $method) = $this->analyzeMethodName($method);
+		list($entity, $method) = $this->analyzeMethodName($method);
 		
 		$return = parent::call__($method, $params);
 		
-		if ($to_entity and !is_null($return)) {
+		if ($entity && !is_null($return)) {
 			$return = $this->convertToEntities($return);
 		}
 		
@@ -107,15 +109,15 @@ class EntityModel extends EntityAppModel {
 	}
 	
 	protected function analyzeMethodName($method) {
-		$to_entity = false;
+		$entity = false;
 		
 		if (preg_match('/^(entity|(?:all)?entities)by(.+)$/i', $method, $matches)) {
-			$to_entity = true;
+			$entity = true;
 			$all = (strtolower($matches[1]) != 'entity');
 			$method = ($all ? 'findAllBy' : 'findBy'). $matches[2];
 		}
 		
-		return array($to_entity, $method);
+		return array($entity, $method);
 	}
 	
 	/**
@@ -162,12 +164,12 @@ class EntityModel extends EntityAppModel {
 		));
 	}
 	
-	public function assignAttribute(Entity $entity, $alias, $value) {
+	public function assignProperty(Entity $entity, $alias, $value) {
 		$name = Inflector::underscore($alias);
 		
 		$Model = $this->getAssociatedModel($alias);
 		if ($Model) {
-			if (is_array($value) and (empty($value) or Set::numeric(array_keys($value)))) {
+			if (is_array($value) && (empty($value) || Set::numeric(array_keys($value)))) {
 				$result = array();
 				foreach ($value as $columns) {
 					$data = array($alias => $columns);
@@ -185,7 +187,7 @@ class EntityModel extends EntityAppModel {
 	}
 	
 	public function getAssociatedModel($alias) {
-		if ($this->schema($alias) or !preg_match('/^[A-Z]/', $alias)) {
+		if ($this->schema($alias) || !preg_match('/^[A-Z]/', $alias)) {
 			return null;
 		}
 		
@@ -208,7 +210,7 @@ class EntityModel extends EntityAppModel {
 			$Model = ClassRegistry::init($alias);
 		}
 		
-		if ($Model and is_a($Model, 'EntityModel')) {
+		if ($Model && is_a($Model, 'EntityModel')) {
 			return $Model;
 		}
 		
@@ -216,3 +218,4 @@ class EntityModel extends EntityAppModel {
 	}
 }
 
+?>

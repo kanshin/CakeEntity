@@ -3,7 +3,7 @@
 class Query extends Object implements ArrayAccess, IteratorAggregate, Countable {
 	static protected $defaults = array();
 	
-	static public function setDefaultOptions($Model, $options=array()) {
+	static public function setDefaultOptions($Model, $options = array()) {
 		self::$defaults[$Model->alias] = $options;
 	}
 	
@@ -19,7 +19,7 @@ class Query extends Object implements ArrayAccess, IteratorAggregate, Countable 
 	protected $options;
 	public $type;
 	
-	public function __construct($Model, $type, $options=array(), $default=true) {
+	public function __construct($Model, $type, $options = array(), $default = true) {
 		$this->Model = $Model;
 		$this->type = $type;
 		$this->options = $options;
@@ -61,7 +61,8 @@ class Query extends Object implements ArrayAccess, IteratorAggregate, Countable 
 		return $this->result();
 	}
 	
-	public function count($total=false) {
+	public function count($total = false) {
 	}
 }
 
+?>
