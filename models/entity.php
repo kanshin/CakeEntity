@@ -31,7 +31,7 @@ class Entity extends Object implements ArrayAccess {
 	 **************************************/
 	
 	public $_name_;
-	private $model_class;
+	private $modelClass;
 	
 	/**
 	 *	Bind the entity and its source model.
@@ -44,7 +44,7 @@ class Entity extends Object implements ArrayAccess {
 		assert('is_array($data)');
 		
 		$this->_name_ = $model->alias;
-		$this->model_class = $model->name;
+		$this->modelClass = $model->name;
 		
 		foreach ($data as $modelClass => $values) {
 			if ($modelClass == $model->alias) {
@@ -64,7 +64,7 @@ class Entity extends Object implements ArrayAccess {
 	
 	public function getModel() {
 		return ClassRegistry::init(array(
-			'class' => $this->model_class, 
+			'class' => $this->modelClass, 
 			'alias' => $this->_name_, 
 			'type' => 'Model', 
 		));

@@ -27,13 +27,13 @@ class EntityModel extends EntityAppModel {
 		return $this->entity($data);
 	}
 	
-	protected function convertToEntities($list_of_data) {
-		if ($list_of_data && !Set::numeric(array_keys($list_of_data))) {
-			return $this->convertToEntity($list_of_data);
+	protected function convertToEntities($list) {
+		if ($list && !Set::numeric(array_keys($list))) {
+			return $this->convertToEntity($list);
 		}
 		
 		$result = array();
-		foreach ($list_of_data as $data) {
+		foreach ($list as $data) {
 			$result[] = $this->convertToEntity($data);
 		}
 		return $result;
@@ -104,11 +104,11 @@ class EntityModel extends EntityAppModel {
 	}
 	
 	public function call__($method, $params) {
-		list($to_entity, $method) = $this->analyzeMethodName($method);
+		list($entity, $method) = $this->analyzeMethodName($method);
 		
 		$return = parent::call__($method, $params);
 		
-		if ($to_entity && !is_null($return)) {
+		if ($entity && !is_null($return)) {
 			$return = $this->convertToEntities($return);
 		}
 		
@@ -116,15 +116,15 @@ class EntityModel extends EntityAppModel {
 	}
 	
 	protected function analyzeMethodName($method) {
-		$to_entity = false;
+		$entity = false;
 		
 		if (preg_match('/^(entity|(?:all)?entities)by(.+)$/i', $method, $matches)) {
-			$to_entity = true;
+			$entity = true;
 			$all = (strtolower($matches[1]) != 'entity');
 			$method = ($all ? 'findAllBy' : 'findBy'). $matches[2];
 		}
 		
-		return array($to_entity, $method);
+		return array($entity, $method);
 	}
 	
 	/**
