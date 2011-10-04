@@ -1,6 +1,7 @@
 <?php
 
-App::import('Model', 'Entity.EntityModel');
+App::uses('EntityModel', 'Entity.Model');
+App::uses('Entity', 'Entity.Model');
 
 /**
  *	Models

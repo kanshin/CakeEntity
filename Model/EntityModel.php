@@ -1,7 +1,8 @@
 <?php
 
-App::uses('Entity', 'Entity.Entity');
-App::uses('AppEntity', 'Entity');
+App::uses('EntityAppModel', 'Entity.Model');
+App::uses('Entity', 'Entity.Model');
+App::uses('AppEntity', 'Entity.Model');
 
 class EntityModel extends EntityAppModel {
 	public $entity;
