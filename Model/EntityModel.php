@@ -194,7 +194,7 @@ class EntityModel extends EntityAppModel {
 		
 		$Model = null;
 		
-		foreach ($this->__associations as $type) {
+		foreach ($this->_associations as $type) {
 			if (!empty($this->{$type}[$alias])) {
 				$association = $this->{$type}[$alias];
 				
